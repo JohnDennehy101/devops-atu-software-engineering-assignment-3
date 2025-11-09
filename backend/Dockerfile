@@ -1,0 +1,33 @@
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache git
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/api ./cmd/api
+
+RUN GOBIN=/app/bin go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates tzdata postgresql-client
+
+WORKDIR /root/
+
+COPY --from=builder /app/bin/api .
+
+COPY --from=builder /app/bin/migrate /usr/local/bin/migrate
+
+COPY --from=builder /app/migrations ./migrations
+
+EXPOSE 4000
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \ 
+    CMD wget --no-verbose --tries=1 --spider http://localhost:4000/v1/healthcheck || exit 1
+
+CMD ["sh", "-c", "migrate -path ./migrations -database $NOTES_DB_DSN up && ./api"]
