@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Docker api env for tests
-        uses: ./.github/actions/docker-test-api-setup.yml
+        uses: ./.github/actions/docker-test-api-setup
       - name: Run Tests
         env:
           NOTES_DB_DSN: "postgres://test_user:test_password@localhost:5432/test_db?sslmode=disable"
