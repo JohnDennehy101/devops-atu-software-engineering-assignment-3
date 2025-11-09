@@ -24,9 +24,26 @@ services:
       - "4000:4000"
     environment:
       NOTES_DB_DSN: "${NOTES_DB_DSN}"
+      HEALTHCHECK_URL: "${API_BASE_URL}/healthcheck"
+      FRONTEND_BASE_URL: "${FRONTEND_BASE_URL}"
     depends_on: 
       db:
         condition: service_healthy
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: "${API_BASE_URL}"
+    environment:
+      SERVER_NAME: "${SERVER_NAME}"
+      VITE_API_BASE_URL: "${API_BASE_URL}"
+    ports:
+      - "3000:80"
+
+    depends_on: 
+      - api
 
 volumes:
   notes-data:
