@@ -1,3 +1,4 @@
+# Build
 FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
@@ -13,6 +14,18 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/api ./cmd/api
 
 RUN GOBIN=/app/bin go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
+# Test
+FROM golang:1.25-alpine AS tester
+
+WORKDIR /app
+
+RUN apk add --no-cache git
+
+COPY --from=builder /app /app/
+
+CMD ["sh"]
+
+# Production
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates tzdata postgresql-client
