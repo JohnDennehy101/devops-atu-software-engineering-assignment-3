@@ -28,6 +28,6 @@ COPY --from=builder /app/migrations ./migrations
 EXPOSE 4000
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \ 
-    CMD wget --no-verbose --tries=1 --spider http://localhost:4000/v1/healthcheck || exit 1
+    CMD wget --no-verbose --tries=1 --spider $HEALTHCHECK_URL || exit 1
 
-CMD ["sh", "-c", "migrate -path ./migrations -database $NOTES_DB_DSN up && ./api"]
+CMD ["sh", "-c", "migrate -path ./migrations -database $NOTES_DB_DSN up && ./api --cors-trusted-origins \"$FRONTEND_BASE_URL\""]
