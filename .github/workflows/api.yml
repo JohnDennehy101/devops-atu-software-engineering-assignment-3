@@ -37,6 +37,9 @@ jobs:
           working-directory: backend
 
   build:
+    needs:
+      - test
+      - lint
     runs-on: ubuntu-latest
     defaults:
       run:
