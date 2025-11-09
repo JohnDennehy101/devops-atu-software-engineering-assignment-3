@@ -24,7 +24,7 @@ jobs:
             sleep 2
           done
       - name: Run Tests
-        run: docker compose -f docker-compose.test.yml run --rm tester sh -c "go test ./... -v"
+        run: docker compose -f docker-compose.test.yml run --rm api sh -c "go test ./... -v"
       - name: Teardown
         if: always()
         run: docker compose -f docker-compose.test.yml down --volumes --remove-orphans
