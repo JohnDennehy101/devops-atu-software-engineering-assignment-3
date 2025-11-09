@@ -19,7 +19,7 @@ FROM golang:1.25-alpine AS tester
 
 WORKDIR /app
 
-RUN apk add --no-cache git
+RUN apk add --no-cache git curl
 
 COPY --from=builder /app /app/
 
