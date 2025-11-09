@@ -16,7 +16,9 @@ jobs:
       - name: Run Tests
         env:
           NOTES_DB_DSN: "postgres://test_user:test_password@localhost:5432/test_db?sslmode=disable"
-        run: go test ./... -v
+        run: |
+          cd backend
+          go test ./... -v
       - name: Teardown
         if: always()
         run: docker compose -f docker-compose.test.yml down --volumes --remove-orphans
