@@ -19,11 +19,9 @@ FROM golang:1.25-alpine AS tester
 
 WORKDIR /app
 
-RUN apk add --no-cache git curl
+RUN apk add --no-cache git
 
 COPY --from=builder /app /app/
-
-RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.59.1
 
 CMD ["sh"]
 
