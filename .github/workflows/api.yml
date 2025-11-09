@@ -22,3 +22,15 @@ jobs:
       - name: Teardown
         if: always()
         run: docker compose -f docker-compose.test.yml down --volumes --remove-orphans
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Docker api env for tests
+        uses: ./.github/actions/docker-test-api-setup
+      - name: Run golangci-lint
+        run: |
+          cd backend
+          docker compose run --rm api sh -c "golangci-lint run"
