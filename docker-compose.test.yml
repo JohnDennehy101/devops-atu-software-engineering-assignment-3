@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - notes-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "test_user", "-d", "test_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: tester
+    environment:
+      NOTES_DB_DSN: "postgres://test_user:test_password@db:5432/test_db?sslmode=disable"
+      FRONTEND_BASE_URL: "http://localhost:3000"
+    depends_on: 
+      db:
+        condition: service_healthy
+        
+volumes:
+  notes-data:
+    
