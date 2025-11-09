@@ -9,6 +9,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
       - name: Setup Docker api env for tests
         uses: ./.github/actions/docker-test-api-setup
       - name: Run Tests

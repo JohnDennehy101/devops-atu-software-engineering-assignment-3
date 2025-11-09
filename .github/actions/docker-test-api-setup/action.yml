@@ -3,8 +3,6 @@ description: "Build and start test container with db for API"
 runs:
   using: "composite"
   steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
       - name: Setup Docker build
         uses: docker/setup-buildx-action@v3
       - name: Build test container
