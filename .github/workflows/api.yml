@@ -8,9 +8,6 @@ on:
 jobs:
   security_snyk:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -19,8 +16,10 @@ jobs:
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        working-directory: backend
         with:
           args: --sarif-file-output=snyk.sarif
+          command: test
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
