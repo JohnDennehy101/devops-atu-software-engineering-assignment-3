@@ -5,6 +5,11 @@ on:
     branches: ["main"]
   pull_request:
 
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 jobs:
   security_snyk:
     runs-on: ubuntu-latest
