@@ -322,3 +322,76 @@ resource "aws_iam_user_policy_attachment" "ecs_service_linked_role" {
   user       = aws_iam_user.cd.name
   policy_arn = aws_iam_policy.ecs_service_linked_role.arn
 }
+
+
+##############################################################
+# Define Policy for ELB, Route 53, ECM access for CI/CD user #
+##############################################################
+
+data "aws_iam_policy_document" "elb_route53_combined" {
+  statement {
+    effect = "Allow"
+    actions = [
+      # Elastic Load Balancer permissions
+      "elasticloadbalancing:DeleteLoadBalancer",
+      "elasticloadbalancing:DeleteTargetGroup",
+      "elasticloadbalancing:DeleteListener",
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeLoadBalancerAttributes",
+      "elasticloadbalancing:DescribeTargetGroups",
+      "elasticloadbalancing:DescribeTargetGroupAttributes",
+      "elasticloadbalancing:DescribeLoadBalancers",
+      "elasticloadbalancing:CreateListener",
+      "elasticloadbalancing:SetSecurityGroups",
+      "elasticloadbalancing:ModifyLoadBalancerAttributes",
+      "elasticloadbalancing:CreateLoadBalancer",
+      "elasticloadbalancing:ModifyTargetGroupAttributes",
+      "elasticloadbalancing:CreateTargetGroup",
+      "elasticloadbalancing:AddTags",
+      "elasticloadbalancing:DescribeTags",
+      "elasticloadbalancing:ModifyListener",
+
+      # Route53 permissions
+      "route53:ListHostedZones",
+      "route53:ChangeTagsForResource",
+      "route53:GetHostedZone",
+      "route53:ListTagsForResource",
+      "route53:ChangeResourceRecordSets",
+      "route53:GetChange",
+      "route53:ListResourceRecordSets",
+
+      # Access Control Manager permissions
+      "acm:RequestCertificate",
+      "acm:AddTagsToCertificate",
+      "acm:DescribeCertificate",
+      "acm:ListTagsForCertificate",
+      "acm:DeleteCertificate",
+      "acm:CreateCertificate"
+    ]
+    resources = ["*"]
+  }
+
+  # Service linked role for Elastic Load Balancer
+  statement {
+    effect    = "Allow"
+    actions   = ["iam:CreateServiceLinkedRole"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "iam:AWSServiceName"
+      values   = ["elasticloadbalancing.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "elb_route53_combined" {
+  name        = "${aws_iam_user.cd.name}-elb-route53"
+  description = "ELB, Route53, and ACM permissions"
+  policy      = data.aws_iam_policy_document.elb_route53_combined.json
+}
+
+resource "aws_iam_user_policy_attachment" "elb_route53_combined" {
+  user       = aws_iam_user.cd.name
+  policy_arn = aws_iam_policy.elb_route53_combined.arn
+}
