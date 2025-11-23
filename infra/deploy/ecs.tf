@@ -160,13 +160,16 @@ resource "aws_security_group" "ecs_service" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
 
-  egress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    security_groups = [aws_security_group.rds.id]
-  }
+resource "aws_security_group_rule" "ecs_egress_to_rds" {
+  type                     = "egress"
+  from_port                = 5432
+  to_port                   = 5432
+  protocol                  = "tcp"
+  cidr_blocks              = [aws_vpc.primary.cidr_block]
+  security_group_id         = aws_security_group.ecs_service.id
+  description               = "ECS egress for RDS"
 }
 
 ##########################
