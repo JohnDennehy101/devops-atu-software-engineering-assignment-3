@@ -11,3 +11,5 @@ services:
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - AWS_DEFAULT_REGION=eu-west-1
       - TF_WORKSPACE=${TF_WORKSPACE}
+      - TF_VAR_ecr_api_image=${TF_VAR_ecr_api_image}
+      - TF_VAR_ecr_frontend_image=${TF_VAR_ecr_frontend_image}

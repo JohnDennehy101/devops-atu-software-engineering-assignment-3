@@ -1,0 +1,13 @@
+name: Terraform checks before deploying
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-lint:
+    name: Lint & Validate
+    uses: ./.github/workflows/lint-and-validate-terraform.yml
+    secrets:
+      DOCKER_HUB_USER: ${{vars.DOCKER_HUB_USER }}
+      DOCKER_HUB_TOKEN: ${{secrets.DOCKER_HUB_TOKEN}}
