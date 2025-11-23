@@ -11,11 +11,12 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "devops-sw-pipelines-assignment-3-tf-state"
-    key            = "terraform-state-deploy"
-    region         = "eu-west-1"
-    encrypt        = true
-    dynamodb_table = "devops-sw-pipelines-assignment-3-tf-state"
+    bucket               = "devops-sw-pipelines-assignment-3-tf-state"
+    key                  = "terraform-state-deploy"
+    workspace_key_prefix = "terraform-state-deploy-env"
+    region               = "eu-west-1"
+    encrypt              = true
+    dynamodb_table       = "devops-sw-pipelines-assignment-3-tf-state"
   }
 }
 
