@@ -13,3 +13,4 @@ services:
       - TF_WORKSPACE=${TF_WORKSPACE}
       - TF_VAR_ecr_api_image=${TF_VAR_ecr_api_image}
       - TF_VAR_ecr_frontend_image=${TF_VAR_ecr_frontend_image}
+      - TF_VAR_database_password=${TF_VAR_database_password}

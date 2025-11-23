@@ -64,3 +64,20 @@ variable "subdomain" {
     dev     = "static.dev"
   }
 }
+
+####################
+# Define db username
+####################
+
+variable "database_username" {
+  description = "database username for notes database"
+  default     = "notes_user"
+}
+
+################################################################
+# Define db password (which will store the value passed to it) #
+################################################################
+
+variable "database_password" {
+  description = "database password for notes database"
+}
