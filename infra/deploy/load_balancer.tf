@@ -96,7 +96,7 @@ resource "aws_lb_listener" "primary_http" {
   protocol          = "HTTP"
 
   default_action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.frontend.arn
 
     # redirect {
