@@ -3,7 +3,11 @@ name: API CI
 on:
   push:
     branches: ["main"]
+    paths:
+      - "backend/**"
   pull_request:
+    paths:
+      - "backend/**"
 
 permissions:
   actions: read
