@@ -142,23 +142,28 @@ resource "aws_security_group" "ecs_service" {
     from_port = 80
     to_port   = 80
     protocol  = "tcp"
-    # TODO: Update to only allow lb security group
-    cidr_blocks = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.lb.id]
   }
 
   ingress {
     from_port = 4000
     to_port   = 4000
     protocol  = "tcp"
-    # TODO: Update to only allow lb security group
-    cidr_blocks = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.lb.id]
   }
 
   egress {
-    from_port   = 443
-    to_port     = 443
+    from_port   = 0
+    to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [aws_vpc.primary.cidr_block]
+  }
+
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = [aws_vpc.primary.cidr_block]
   }
 }
 
@@ -184,17 +189,23 @@ resource "aws_ecs_service" "primary" {
   launch_type            = "FARGATE"
   platform_version       = "1.4.0"
   enable_execute_command = true
-  #   depends_on = [
-  #     aws_lb_listener.static_site_https,
-  #     aws_lb_listener.static_site_http
-  #   ]
+  depends_on = [
+    #   aws_lb_listener.static_site_https,
+    aws_lb_listener.primary_http
+  ]
   network_configuration {
     subnets         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
     security_groups = [aws_security_group.ecs_service.id]
   }
-  #   load_balancer {
-  #     target_group_arn = aws_lb_target_group.static_site.arn
-  #     container_name   = "static_site"
-  #     container_port   = 80
-  #   }
+  load_balancer {
+    target_group_arn = aws_lb_target_group.frontend.arn
+    container_name   = "frontend"
+    container_port   = 80
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.api.arn
+    container_name   = "api"
+    container_port   = 4000
+  }
 }
