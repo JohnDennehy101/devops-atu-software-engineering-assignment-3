@@ -336,12 +336,15 @@ data "aws_iam_policy_document" "elb_route53_combined" {
       "elasticloadbalancing:DeleteLoadBalancer",
       "elasticloadbalancing:DeleteTargetGroup",
       "elasticloadbalancing:DeleteListener",
+      "elasticloadbalancing:DeleteRule",
       "elasticloadbalancing:DescribeListeners",
       "elasticloadbalancing:DescribeLoadBalancerAttributes",
       "elasticloadbalancing:DescribeTargetGroups",
       "elasticloadbalancing:DescribeTargetGroupAttributes",
       "elasticloadbalancing:DescribeLoadBalancers",
+      "elasticloadbalancing:DescribeRules",
       "elasticloadbalancing:CreateListener",
+      "elasticloadbalancing:CreateRule",
       "elasticloadbalancing:SetSecurityGroups",
       "elasticloadbalancing:ModifyLoadBalancerAttributes",
       "elasticloadbalancing:CreateLoadBalancer",
@@ -350,6 +353,7 @@ data "aws_iam_policy_document" "elb_route53_combined" {
       "elasticloadbalancing:AddTags",
       "elasticloadbalancing:DescribeTags",
       "elasticloadbalancing:ModifyListener",
+      "elasticloadbalancing:ModifyRule",
 
       # Route53 permissions
       "route53:ListHostedZones",
