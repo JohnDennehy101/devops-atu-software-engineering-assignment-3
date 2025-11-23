@@ -1,0 +1,77 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - prod
+
+jobs:
+  lint_and_validate:
+    uses: ./.github/workflows/lint-and-validate-terraform.yml
+    name: Lint & Validate Terraform
+    secrets:
+      DOCKER_HUB_USER: ${{vars.DOCKER_HUB_USER}}
+      DOCKER_HUB_TOKEN: ${{secrets.DOCKER_HUB_TOKEN}}
+
+  build_and_push_images:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [lint_and_validate]
+    outputs:
+      api_image_tag: ${{ steps.api_image.outputs.tag }}
+      frontend_image_tag: ${{ steps.frontend_image.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Push API to ECR
+        id: api_image
+        env:
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        run: |
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{vars.AWS_ACCOUNT_ID}}.dkr.ecr.eu-west-1.amazonaws.com
+          API_IMAGE_TAG=${{ github.sha }}
+          API_IMAGE_URI="${{ vars.ECR_REPO_API}}:$API_IMAGE_TAG"
+          docker build --compress -t $API_IMAGE_URI ./backend
+          docker push $API_IMAGE_URI
+          echo "tag=$API_IMAGE_URI" >> $GITHUB_OUTPUT
+      - name: Push Frontend to ECR
+        id: frontend_image
+        env:
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        run: |
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{vars.AWS_ACCOUNT_ID}}.dkr.ecr.eu-west-1.amazonaws.com
+          FRONTEND_IMAGE_TAG=${{ github.sha }}
+          FRONTEND_IMAGE_URI="${{ vars.ECR_REPO_FRONTEND}}:$FRONTEND_IMAGE_TAG"
+          docker build --compress -t $FRONTEND_IMAGE_URI ./frontend
+          docker push $FRONTEND_IMAGE_URI
+          echo "tag=$FRONTEND_IMAGE_URI" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [build_and_push_images]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set variables
+        run: |
+          if [[ $GITHUB_REF == 'refs/heads/prod' ]]; then
+              echo "prod" > .workspace
+          else
+              echo "staging" > .workspace
+          fi
+      - name: Terraform apply
+        env:
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        run: |
+          export TF_VAR_ecr_api_image="${{ needs.build_and_push_images.outputs.api_image_tag }}"
+          export TF_VAR_ecr_frontend_image="${{ needs.build_and_push_images.outputs.frontend_image_tag }}"
+          workspace=$(cat .workspace)
+          cd infra/
+          docker compose run --rm terraform -chdir=deploy/ init
+          docker compose run --rm terraform -chdir=deploy/ workspace select -or-create $workspace
+          docker compose run --rm terraform -chdir=deploy/ apply -auto-approve
