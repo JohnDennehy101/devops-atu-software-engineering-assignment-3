@@ -137,34 +137,26 @@ resource "aws_security_group" "ecs_service" {
   description = "Access for ecs service"
   name        = "${local.prefix}-ecs-service"
   vpc_id      = aws_vpc.primary.id
+}
 
-  ingress {
-    from_port = 80
-    to_port   = 80
-    protocol  = "tcp"
-    security_groups = [aws_security_group.lb.id]
-  }
+resource "aws_security_group_rule" "ecs_ingress_from_lb_frontend" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.lb.id
+  security_group_id        = aws_security_group.ecs_service.id
+  description              = "HTTP from ALB"
+}
 
-  ingress {
-    from_port = 4000
-    to_port   = 4000
-    protocol  = "tcp"
-    security_groups = [aws_security_group.lb.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.primary.cidr_block]
-  }
-
-  egress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "udp"
-    cidr_blocks = [aws_vpc.primary.cidr_block]
-  }
+resource "aws_security_group_rule" "ecs_ingress_from_lb_api" {
+  type                     = "ingress"
+  from_port                = 4000
+  to_port                  = 4000
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.lb.id
+  security_group_id        = aws_security_group.ecs_service.id
+  description              = "API from ALB"
 }
 
 resource "aws_security_group_rule" "ecs_egress_to_rds" {
@@ -175,6 +167,26 @@ resource "aws_security_group_rule" "ecs_egress_to_rds" {
   cidr_blocks       = [aws_vpc.primary.cidr_block]
   security_group_id = aws_security_group.ecs_service.id
   description       = "ECS egress for RDS"
+}
+
+resource "aws_security_group_rule" "ecs_egress_vpc_tcp" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "tcp"
+  cidr_blocks       = [aws_vpc.primary.cidr_block]
+  security_group_id = aws_security_group.ecs_service.id
+  description       = "VPC TCP communication internally"
+}
+
+resource "aws_security_group_rule" "ecs_egress_dns" {
+  type              = "egress"
+  from_port         = 53
+  to_port           = 53
+  protocol          = "udp"
+  cidr_blocks       = [aws_vpc.primary.cidr_block]
+  security_group_id = aws_security_group.ecs_service.id
+  description       = "DNS resolution internally"
 }
 
 ##########################

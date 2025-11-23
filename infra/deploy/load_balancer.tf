@@ -20,27 +20,26 @@ resource "aws_security_group" "lb" {
     to_port     = 443
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
 
-  egress {
-    protocol    = "tcp"
-    from_port   = 443
-    to_port     = 443
-    security_groups = [aws_security_group.ecs_service.id]
-  }
+resource "aws_security_group_rule" "lb_egress_to_ecs_frontend" {
+  type                     = "egress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.ecs_service.id
+  security_group_id        = aws_security_group.lb.id
+  description              = "HTTP to ECS frontend"
+}
 
-  egress {
-    protocol    = "tcp"
-    from_port   = 80
-    to_port     = 80
-    security_groups = [aws_security_group.ecs_service.id]
-  }
-
-  egress {
-    protocol    = "tcp"
-    from_port   = 4000
-    to_port     = 4000
-    security_groups = [aws_security_group.ecs_service.id]
-  }
+resource "aws_security_group_rule" "lb_egress_to_ecs_api" {
+  type                     = "egress"
+  from_port                = 4000
+  to_port                  = 4000
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.ecs_service.id
+  security_group_id        = aws_security_group.lb.id
+  description              = "HTTP to ECS API"
 }
 
 ############################
