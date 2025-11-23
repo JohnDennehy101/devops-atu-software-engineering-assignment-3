@@ -70,16 +70,16 @@ resource "aws_ecs_task_definition" "primary" {
   execution_role_arn       = aws_iam_role.task_execute_role.arn
   container_definitions = jsonencode([
     {
-      name              = "api"
-      image             = var.ecr_api_image
-      essential         = true
+      name      = "api"
+      image     = var.ecr_api_image
+      essential = true
       environment = [
         {
-          name = "NOTES_DB_DSN"
+          name  = "NOTES_DB_DSN"
           value = "postgres://${var.database_username}:${var.database_password}@${aws_db_instance.primary.address}:${aws_db_instance.primary.port}/${aws_db_instance.primary.db_name}?sslmode=require"
         },
         {
-          name = "FRONTEND_BASE_URL"
+          name  = "FRONTEND_BASE_URL"
           value = "https://${var.subdomain[terraform.workspace]}.${var.dns_zone_name}"
         }
       ]
@@ -98,12 +98,12 @@ resource "aws_ecs_task_definition" "primary" {
       }]
     },
     {
-      name              = "frontend"
-      image             = var.ecr_frontend_image
-      essential         = true
+      name      = "frontend"
+      image     = var.ecr_frontend_image
+      essential = true
       environment = [
         {
-          name = "VITE_API_BASE_URL"
+          name  = "VITE_API_BASE_URL"
           value = "https://${var.subdomain[terraform.workspace]}.${var.dns_zone_name}"
         }
       ]
@@ -163,13 +163,13 @@ resource "aws_security_group" "ecs_service" {
 }
 
 resource "aws_security_group_rule" "ecs_egress_to_rds" {
-  type                     = "egress"
-  from_port                = 5432
-  to_port                   = 5432
-  protocol                  = "tcp"
-  cidr_blocks              = [aws_vpc.primary.cidr_block]
-  security_group_id         = aws_security_group.ecs_service.id
-  description               = "ECS egress for RDS"
+  type              = "egress"
+  from_port         = 5432
+  to_port           = 5432
+  protocol          = "tcp"
+  cidr_blocks       = [aws_vpc.primary.cidr_block]
+  security_group_id = aws_security_group.ecs_service.id
+  description       = "ECS egress for RDS"
 }
 
 ##########################
