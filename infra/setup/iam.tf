@@ -281,7 +281,17 @@ data "aws_iam_policy_document" "logs" {
       "logs:DescribeLogGroups",
       "logs:CreateLogGroup",
       "logs:TagResource",
-      "logs:ListTagsLogGroup"
+      "logs:ListTagsLogGroup",
+      "cloudwatch:PutDashboard",
+      "cloudwatch:GetDashboard",
+      "cloudwatch:DeleteDashboard",
+      "cloudwatch:ListDashboards",
+      "cloudwatch:PutMetricAlarm",
+      "cloudwatch:DescribeAlarms",
+      "cloudwatch:DeleteAlarms",
+      "cloudwatch:PutMetricData",
+      "cloudwatch:GetMetricStatistics",
+      "cloudwatch:GetMetricData"
     ]
     resources = ["*"]
   }
