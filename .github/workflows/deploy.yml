@@ -47,9 +47,9 @@ jobs:
           FRONTEND_IMAGE_URI="${{ vars.ECR_REPO_FRONTEND}}:$FRONTEND_IMAGE_TAG"
 
           if [[ "$GITHUB_REF" == "refs/heads/prod" ]]; then
-            API_URL="https://code.${{ vars.DOMAIN_NAME }}"
+            API_URL="https://code.${{ vars.DOMAIN_NAME }}/v1"
           else
-            API_URL="https://code.staging.${{ vars.DOMAIN_NAME }}"
+            API_URL="https://code.staging.${{ vars.DOMAIN_NAME }}/v1"
           fi
 
           docker build --compress \
