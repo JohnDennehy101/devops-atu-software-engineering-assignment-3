@@ -54,6 +54,11 @@ resource "aws_cloudwatch_log_group" "frontend_logs" {
 
 resource "aws_ecs_cluster" "primary" {
   name = "${local.prefix}-cluster"
+
+  setting {
+    name = "containerInsights"
+    value = "enabled"
+  }
 }
 
 #######################
