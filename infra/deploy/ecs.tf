@@ -76,7 +76,7 @@ resource "aws_ecs_task_definition" "primary" {
       environment = [
         {
           name  = "NOTES_DB_DSN"
-          value = "postgres://${var.database_username}:${var.database_password}@${aws_db_instance.primary.address}:${aws_db_instance.primary.port}/${aws_db_instance.primary.db_name}?sslmode=require"
+          value = "postgres://${var.database_username}:${urlencode(var.database_password)}@${aws_db_instance.primary.address}:${aws_db_instance.primary.port}/${aws_db_instance.primary.db_name}?sslmode=require"
         },
         {
           name  = "FRONTEND_BASE_URL"
