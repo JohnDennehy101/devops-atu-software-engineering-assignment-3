@@ -119,6 +119,7 @@ data "aws_iam_policy_document" "ec2" {
       "ec2:DescribeVpcEndpoints",
       "ec2:DescribeRouteTables",
       "ec2:DeleteRouteTable",
+      "ec2:DeleteVpcEndpoint",
       "ec2:DeleteVpcEndpoints",
       "ec2:DisassociateRouteTable",
       "ec2:DeleteRoute",
@@ -137,8 +138,10 @@ data "aws_iam_policy_document" "ec2" {
       "ec2:CreateRoute",
       "ec2:CreateRouteTable",
       "ec2:CreateInternetGateway",
+      "ec2:CreateVpcEndpoint",
       "ec2:AttachInternetGateway",
       "ec2:ModifyVpcAttribute",
+      "ec2:ModifyVpcEndpoint",
       "ec2:RevokeSecurityGroupIngress",
     ]
     resources = ["*"]

@@ -171,22 +171,12 @@ resource "aws_security_group_rule" "ecs_egress_to_rds" {
 
 resource "aws_security_group_rule" "ecs_egress_vpc_tcp" {
   type              = "egress"
-  from_port         = 0
-  to_port           = 65535
+  from_port         = 443
+  to_port           = 443
   protocol          = "tcp"
-  cidr_blocks       = [aws_vpc.primary.cidr_block]
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.ecs_service.id
-  description       = "VPC TCP communication internally"
-}
-
-resource "aws_security_group_rule" "ecs_egress_dns" {
-  type              = "egress"
-  from_port         = 53
-  to_port           = 53
-  protocol          = "udp"
-  cidr_blocks       = [aws_vpc.primary.cidr_block]
-  security_group_id = aws_security_group.ecs_service.id
-  description       = "DNS resolution internally"
+  description       = "HTTPS TCP communication"
 }
 
 ##########################
