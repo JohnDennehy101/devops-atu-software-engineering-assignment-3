@@ -351,6 +351,7 @@ data "aws_iam_policy_document" "elb_route53_combined" {
       "elasticloadbalancing:SetSecurityGroups",
       "elasticloadbalancing:ModifyLoadBalancerAttributes",
       "elasticloadbalancing:CreateLoadBalancer",
+      "elasticloadbalancing:ModifyTargetGroup",
       "elasticloadbalancing:ModifyTargetGroupAttributes",
       "elasticloadbalancing:CreateTargetGroup",
       "elasticloadbalancing:AddTags",
