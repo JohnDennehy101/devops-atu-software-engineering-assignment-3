@@ -96,19 +96,31 @@ resource "aws_lb_listener" "primary_http" {
   protocol          = "HTTP"
 
   default_action {
+    type = "redirect"
+
+    redirect {
+      port        = 443
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+resource "aws_lb_listener" "primary_https" {
+  load_balancer_arn = aws_lb.primary.arn
+  port              = 443
+  protocol          = "HTTPS"
+
+  certificate_arn = aws_acm_certificate_validation.cert.certificate_arn
+
+  default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.frontend.arn
-
-    # redirect {
-    #   port        = 443
-    #   protocol    = "HTTPS"
-    #   status_code = "HTTP_301"
-    # }
   }
 }
 
 resource "aws_lb_listener_rule" "api" {
-  listener_arn = aws_lb_listener.primary_http.arn
+  listener_arn = aws_lb_listener.primary_https.arn
   priority     = 100
 
   action {
@@ -122,18 +134,4 @@ resource "aws_lb_listener_rule" "api" {
     }
   }
 }
-
-
-# resource "aws_lb_listener" "static_site_https" {
-#   load_balancer_arn = aws_lb.static_site.arn
-#   port              = 443
-#   protocol          = "HTTPS"
-
-#   certificate_arn = aws_acm_certificate_validation.cert.certificate_arn
-
-#   default_action {
-#     type             = "forward"
-#     target_group_arn = aws_lb_target_group.static_site.arn
-#   }
-# }
 
