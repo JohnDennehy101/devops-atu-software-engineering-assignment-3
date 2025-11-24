@@ -291,7 +291,9 @@ data "aws_iam_policy_document" "logs" {
       "cloudwatch:DeleteAlarms",
       "cloudwatch:PutMetricData",
       "cloudwatch:GetMetricStatistics",
-      "cloudwatch:GetMetricData"
+      "cloudwatch:GetMetricData",
+      "cloudwatch:TagResource",
+      "cloudwatch:ListTagsForResource"
     ]
     resources = ["*"]
   }
