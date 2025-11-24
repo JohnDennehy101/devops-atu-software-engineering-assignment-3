@@ -84,7 +84,7 @@ resource "aws_cloudwatch_dashboard" "api" {
         }
       }
     ]
-    })
+  })
 }
 
 
