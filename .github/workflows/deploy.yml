@@ -45,7 +45,16 @@ jobs:
           aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{vars.AWS_ACCOUNT_ID}}.dkr.ecr.eu-west-1.amazonaws.com
           FRONTEND_IMAGE_TAG=${{ github.sha }}
           FRONTEND_IMAGE_URI="${{ vars.ECR_REPO_FRONTEND}}:$FRONTEND_IMAGE_TAG"
-          docker build --compress -t $FRONTEND_IMAGE_URI ./frontend
+
+          if [[ "$GITHUB_REF" == "refs/heads/prod" ]]; then
+            API_URL="https://code.${{ vars.DOMAIN_NAME }}"
+          else
+            API_URL="https://code.staging.${{ vars.DOMAIN_NAME }}"
+          fi
+
+          docker build --compress \
+            --build-arg VITE_API_BASE_URL="$API_URL" \
+            -t $FRONTEND_IMAGE_URI ./frontend
           docker push $FRONTEND_IMAGE_URI
           echo "tag=$FRONTEND_IMAGE_URI" >> $GITHUB_OUTPUT
 
