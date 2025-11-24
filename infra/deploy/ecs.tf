@@ -202,7 +202,6 @@ resource "aws_ecs_service" "primary" {
   platform_version       = "1.4.0"
   enable_execute_command = true
   depends_on = [
-    #   aws_lb_listener.static_site_https,
     aws_lb_listener_rule.api,
     aws_lb_listener.primary_http
   ]

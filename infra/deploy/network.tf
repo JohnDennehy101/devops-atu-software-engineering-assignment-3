@@ -98,6 +98,19 @@ resource "aws_subnet" "private_a" {
   }
 }
 
+resource "aws_route_table" "private_a" {
+  vpc_id = aws_vpc.primary.id
+
+  tags = {
+    Name = "${local.prefix}-private-a"
+  }
+}
+
+resource "aws_route_table_association" "private_a" {
+  subnet_id      = aws_subnet.private_a.id
+  route_table_id = aws_route_table.private_a.id
+}
+
 resource "aws_subnet" "private_b" {
   vpc_id            = aws_vpc.primary.id
   cidr_block        = "10.0.20.0/24"
@@ -105,6 +118,19 @@ resource "aws_subnet" "private_b" {
   tags = {
     Name = "${local.prefix}-private-b"
   }
+}
+
+resource "aws_route_table" "private_b" {
+  vpc_id = aws_vpc.primary.id
+
+  tags = {
+    Name = "${local.prefix}-private-b"
+  }
+}
+
+resource "aws_route_table_association" "private_b" {
+  subnet_id      = aws_subnet.private_b.id
+  route_table_id = aws_route_table.private_b.id
 }
 
 ############################
@@ -173,7 +199,10 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.primary.id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = [aws_vpc.primary.default_route_table_id]
+  route_table_ids = [
+    aws_route_table.private_a.id,
+    aws_route_table.private_b.id
+  ]
 
   tags = {
     Name = "${local.prefix}-s3-end-point"
