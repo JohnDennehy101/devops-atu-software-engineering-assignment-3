@@ -70,7 +70,12 @@ resource "aws_lb_target_group" "api" {
   port        = 4000
 
   health_check {
-    path = "/healthcheck"
+    path = "/v1/healthcheck"
+    healthy_threshold = 2
+    unhealthy_threshold = 3
+    timeout = 5
+    interval = 30
+    matcher = "200
   }
 }
 
