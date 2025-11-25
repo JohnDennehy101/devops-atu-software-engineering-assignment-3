@@ -284,7 +284,7 @@ data "aws_iam_policy_document" "logs" {
       "logs:ListTagsLogGroup",
       "cloudwatch:PutDashboard",
       "cloudwatch:GetDashboard",
-      "cloudwatch:DeleteDashboard",
+      "cloudwatch:DeleteDashboards",
       "cloudwatch:ListDashboards",
       "cloudwatch:PutMetricAlarm",
       "cloudwatch:DescribeAlarms",
