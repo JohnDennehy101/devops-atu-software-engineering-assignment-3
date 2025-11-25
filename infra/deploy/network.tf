@@ -15,6 +15,10 @@ resource "aws_vpc" "primary" {
 resource "aws_internet_gateway" "primary" {
   vpc_id = aws_vpc.primary.id
 
+  depends_on = [
+    aws_lb.primary
+  ]
+
   tags = {
     Name = "${local.prefix}-primary"
   }
