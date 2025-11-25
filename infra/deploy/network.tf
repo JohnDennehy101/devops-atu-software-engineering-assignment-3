@@ -8,6 +8,20 @@ resource "aws_vpc" "primary" {
   enable_dns_support   = true
 }
 
+##########################
+# Time Provider Definition
+##########################
+
+provider "time" {}
+
+resource "time_sleep" "wait_for_public_ips" {
+  destroy_duration = "90s"
+
+  depends_on = [
+    aws_lb.primary
+  ]
+}
+
 ###############################
 # Internet Gateway Definition #
 ###############################
@@ -16,7 +30,7 @@ resource "aws_internet_gateway" "primary" {
   vpc_id = aws_vpc.primary.id
 
   depends_on = [
-    aws_lb.primary
+    time_sleep.wait_for_public_ips
   ]
 
   tags = {
