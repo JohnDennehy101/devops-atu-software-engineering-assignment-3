@@ -52,6 +52,16 @@ resource "aws_security_group_rule" "lb_egress_to_prometheus" {
   description              = "HTTP to Prometheus"
 }
 
+resource "aws_security_group_rule" "lb_egress_to_grafana" {
+  type                     = "egress"
+  from_port                = 3000
+  to_port                  = 3000
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.grafana.id
+  security_group_id        = aws_security_group.lb.id
+  description              = "HTTP to Grafana"
+}
+
 ############################
 # Load Balancer Definition #
 ############################
@@ -110,6 +120,23 @@ resource "aws_lb_target_group" "prometheus" {
 
   health_check {
     path                = "/-/healthy"
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+    matcher             = "200"
+  }
+}
+
+resource "aws_lb_target_group" "grafana" {
+  name        = "${local.prefix}-grafana"
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.primary.id
+  target_type = "ip"
+  port        = 3000
+
+  health_check {
+    path                = "/api/health"
     healthy_threshold   = 2
     unhealthy_threshold = 3
     timeout             = 5
@@ -183,3 +210,18 @@ resource "aws_lb_listener_rule" "prometheus" {
   }
 }
 
+resource "aws_lb_listener_rule" "grafana" {
+  listener_arn = aws_lb_listener.primary_https.arn
+  priority     = 40
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.grafana.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/grafana", "/grafana/*"]
+    }
+  }
+}
