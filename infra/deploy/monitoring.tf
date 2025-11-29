@@ -472,7 +472,7 @@ resource "aws_ecs_task_definition" "prometheus" {
         {
           sourceVolume  = "prometheus-config"
           containerPath = "/etc/prometheus"
-          readOnly      = true
+          readOnly      = false
         },
         {
           sourceVolume  = "prometheus-data"
