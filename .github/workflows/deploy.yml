@@ -71,6 +71,7 @@ jobs:
           docker push ${{ steps.api_image.outputs.tag }}
       - name: Build Frontend Docker Image
         id: frontend_image
+        if: steps.trivy_api.outcome == 'success'
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -92,6 +93,7 @@ jobs:
           echo "tag=$FRONTEND_IMAGE_URI" >> $GITHUB_OUTPUT
       - name: Scan Frontend Docker Image with Trivy
         id: trivy_frontend
+        if: steps.trivy_api.outcome == 'success'
         uses: aquasecurity/trivy-action@master
         continue-on-error: true
         with:
@@ -103,16 +105,16 @@ jobs:
       - name: Upload Frontend Trivy Results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
         continue-on-error: true
-        if: always()
+        if: always() && steps.trivy_api.outcome == 'success'
         with:
           sarif_file: "trivy-frontend-results.sarif"
       - name: Fail if vulnerabilities found in Frontend container
-        if: steps.trivy_frontend.outcome == 'failure'
+        if: steps.trivy_api.outcome == 'success' && steps.trivy_frontend.outcome == 'failure'
         run: |
           echo "Trivy found vulnerabilities in Frontend image"
           exit 1
       - name: Push Frontend Docker Image to ECR
-        if: steps.trivy_frontend.outcome == 'success'
+        if: steps.trivy_api.outcome == 'success' && steps.trivy_frontend.outcome == 'success'
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}

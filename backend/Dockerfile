@@ -3,7 +3,7 @@ FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache git
+RUN apk update && apk upgrade && apk add --no-cache git
 
 COPY go.mod go.sum ./
 RUN go mod download
@@ -19,7 +19,7 @@ FROM golang:1.25-alpine AS tester
 
 WORKDIR /app
 
-RUN apk add --no-cache git
+RUN apk update && apk upgrade && apk add --no-cache git
 
 COPY --from=builder /app /app/
 
@@ -28,7 +28,8 @@ CMD ["sh"]
 # Production
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates tzdata postgresql-client
+RUN apk update && apk upgrade --no-cache && \
+    apk --no-cache add ca-certificates tzdata postgresql-client
 
 WORKDIR /root/
 
