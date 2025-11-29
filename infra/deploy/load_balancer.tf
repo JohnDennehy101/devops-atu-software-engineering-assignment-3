@@ -178,6 +178,11 @@ resource "aws_lb_listener" "primary_https" {
   }
 }
 
+resource "aws_lb_listener_certificate" "grafana" {
+  listener_arn    = aws_lb_listener.primary_https.arn
+  certificate_arn = aws_acm_certificate_validation.grafana_cert.certificate_arn
+}
+
 resource "aws_lb_listener_rule" "api" {
   listener_arn = aws_lb_listener.primary_https.arn
   priority     = 100
@@ -210,27 +215,6 @@ resource "aws_lb_listener_rule" "prometheus" {
   }
 }
 
-resource "aws_lb_listener_rule" "grafana_root" {
-  listener_arn = aws_lb_listener.primary_https.arn
-  priority     = 39
-
-  action {
-    type = "redirect"
-    redirect {
-      path        = "/grafana/"
-      status_code = "HTTP_301"
-      protocol    = "HTTPS"
-      port        = "443"
-    }
-  }
-
-  condition {
-    path_pattern {
-      values = ["/grafana"]
-    }
-  }
-}
-
 resource "aws_lb_listener_rule" "grafana" {
   listener_arn = aws_lb_listener.primary_https.arn
   priority     = 40
@@ -241,8 +225,8 @@ resource "aws_lb_listener_rule" "grafana" {
   }
 
   condition {
-    path_pattern {
-      values = ["/grafana/*"]
+    host_header {
+      values = [aws_route53_record.grafana.name]
     }
   }
 }
