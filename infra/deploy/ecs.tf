@@ -217,8 +217,6 @@ resource "aws_service_discovery_service" "api" {
 
     routing_policy = "MULTIVALUE"
   }
-
-  health_check_grace_period_seconds = 30
 }
 
 resource "aws_service_discovery_service" "prometheus" {
@@ -234,8 +232,6 @@ resource "aws_service_discovery_service" "prometheus" {
 
     routing_policy = "MULTIVALUE"
   }
-
-  health_check_grace_period_seconds = 30
 }
 
 ##########################
