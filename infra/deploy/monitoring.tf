@@ -612,7 +612,7 @@ resource "aws_ecs_task_definition" "grafana" {
             - name: Prometheus
               type: prometheus
               access: proxy
-              url: ${PROMETHEUS_URL}
+              url: $${PROMETHEUS_URL}
               isDefault: true
               editable: true
               jsonData:
