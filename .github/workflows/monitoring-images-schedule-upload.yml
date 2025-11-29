@@ -1,4 +1,4 @@
-name: Push Monitoring Images to ECR
+name: Push Prometheus and Grafana Images to ECR
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
   push:
     paths:
       - "infra/setup/ecr.tf"
-      - ".github/workflows/sync-monitoring-images.yml"
+      - ".github/workflows/monitoring-images-schedule-upload.yml"
 
 permissions:
   actions: read
