@@ -414,7 +414,7 @@ data "aws_iam_policy_document" "elb_route53_combined" {
       "elasticloadbalancing:ModifyRule",
       "elasticloadbalancing:AddListenerCertificates",
       "elasticloadbalancing:DescribeListenerCertificates",
-      "elasticloadbalancing:RemoveListenerCertificates",   
+      "elasticloadbalancing:RemoveListenerCertificates",
 
       # Route53 permissions
       "route53:ListHostedZones",
