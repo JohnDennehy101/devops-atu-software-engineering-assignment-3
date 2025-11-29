@@ -415,3 +415,46 @@ resource "aws_iam_user_policy_attachment" "elb_route53_combined" {
   user       = aws_iam_user.cd.name
   policy_arn = aws_iam_policy.elb_route53_combined.arn
 }
+
+###############################################
+# Define Policy for EFS access for CI/CD user #
+###############################################
+
+data "aws_iam_policy_document" "efs" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticfilesystem:CreateFileSystem",
+      "elasticfilesystem:DeleteFileSystem",
+      "elasticfilesystem:DescribeFileSystems",
+      "elasticfilesystem:CreateMountTarget",
+      "elasticfilesystem:DeleteMountTarget",
+      "elasticfilesystem:DescribeMountTargets",
+      "elasticfilesystem:CreateAccessPoint",
+      "elasticfilesystem:DeleteAccessPoint",
+      "elasticfilesystem:DescribeAccessPoints",
+      "elasticfilesystem:TagResource",
+      "elasticfilesystem:DescribeTags",
+      "elasticfilesystem:ModifyMountTargetSecurityGroups",
+      "elasticfilesystem:DescribeMountTargetSecurityGroups",
+      "elasticfilesystem:DescribeBackupPolicy",
+      "elasticfilesystem:PutBackupPolicy",
+      "elasticfilesystem:DeleteBackupPolicy",
+      "elasticfilesystem:DescribeLifecycleConfiguration",
+      "elasticfilesystem:PutLifecycleConfiguration",
+      "elasticfilesystem:DeleteLifecycleConfiguration"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "efs" {
+  name        = "${aws_iam_user.cd.name}-efs"
+  description = "EFS permissions"
+  policy      = data.aws_iam_policy_document.efs.json
+}
+
+resource "aws_iam_user_policy_attachment" "efs" {
+  user       = aws_iam_user.cd.name
+  policy_arn = aws_iam_policy.efs.arn
+}

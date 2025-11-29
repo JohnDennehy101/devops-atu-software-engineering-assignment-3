@@ -365,3 +365,195 @@ resource "aws_cloudwatch_metric_alarm" "rds_low_storage" {
     Name = "${local.prefix}-rds-low-storage-alarm"
   }
 }
+
+##################################################
+# Cloudwatch log group Definition for Prometheus #
+##################################################
+
+resource "aws_cloudwatch_log_group" "prometheus_logs" {
+  name = "${local.prefix}-prometheus"
+}
+
+############################################
+# Security group Definition for Prometheus #
+############################################
+
+resource "aws_security_group" "prometheus" {
+  name        = "${local.prefix}-prometheus"
+  description = "Security group for Prometheus"
+  vpc_id      = aws_vpc.primary.id
+
+  ingress {
+    from_port       = 9090
+    to_port         = 9090
+    protocol        = "tcp"
+    security_groups = [aws_security_group.lb.id]
+    description     = "Allow Prometheus UI from Load Balancer"
+  }
+
+  ingress {
+    from_port       = 9090
+    to_port         = 9090
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_service.id]
+    description     = "Allow Prometheus metrics obtained from API"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${local.prefix}-prometheus"
+  }
+}
+
+######################################
+# ECS Task Definition for Prometheus #
+######################################
+
+resource "aws_ecs_task_definition" "prometheus" {
+  family                   = "${local.prefix}-prometheus"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  task_role_arn            = aws_iam_role.task_role.arn
+  cpu                      = 512
+  memory                   = 1024
+  execution_role_arn       = aws_iam_role.task_execute_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name       = "prometheus"
+      image      = "prom/prometheus:latest"
+      essential  = true
+      entryPoint = ["sh", "-c"]
+      command = [
+        <<-EOT
+          while [ ! -d /etc/prometheus ]; do sleep 1; done
+          
+          if [ ! -f /etc/prometheus/prometheus.yml ]; then
+            cat > /etc/prometheus/prometheus.yml <<'EOF'
+          global:
+            scrape_interval: 15s
+            evaluation_interval: 15s
+          
+          scrape_configs:
+            - job_name: "api"
+              metrics_path: "/v1/metrics"
+              static_configs:
+                - targets: ["${aws_lb.primary.dns_name}:443"]
+                  labels:
+                    service: "api"
+                    environment: "${terraform.workspace}"
+              scheme: "https"
+              tls_config:
+                insecure_skip_verify: true
+          
+            - job_name: "prometheus"
+              static_configs:
+                - targets: ["localhost:9090"]
+          EOF
+            chmod 644 /etc/prometheus/prometheus.yml
+          fi
+          
+          exec /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus
+        EOT
+      ]
+      environment = [
+        {
+          name  = "PROMETHEUS_STORAGE_PATH"
+          value = "/prometheus"
+        }
+      ]
+      mountPoints = [
+        {
+          sourceVolume  = "prometheus-config"
+          containerPath = "/etc/prometheus"
+          readOnly      = true
+        },
+        {
+          sourceVolume  = "prometheus-data"
+          containerPath = "/prometheus"
+          readOnly      = false
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.prometheus_logs.name
+          awslogs-region        = data.aws_region.current.name
+          awslogs-stream-prefix = "prometheus"
+        }
+      }
+      portMappings = [{
+        containerPort = 9090
+        hostPort      = 9090
+        protocol      = "tcp"
+      }]
+    }
+  ])
+
+  volume {
+    name = "prometheus-config"
+    efs_volume_configuration {
+      file_system_id     = aws_efs_file_system.prometheus_config.id
+      root_directory     = "/"
+      transit_encryption = "ENABLED"
+      authorization_config {
+        access_point_id = aws_efs_access_point.prometheus_config.id
+        iam             = "ENABLED"
+      }
+    }
+  }
+
+  volume {
+    name = "prometheus-data"
+    efs_volume_configuration {
+      file_system_id     = aws_efs_file_system.prometheus_data.id
+      root_directory     = "/"
+      transit_encryption = "ENABLED"
+      authorization_config {
+        access_point_id = aws_efs_access_point.prometheus_data.id
+        iam             = "ENABLED"
+      }
+    }
+  }
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
+}
+
+#########################################
+# ECS Service Definition for Prometheus #
+#########################################
+
+resource "aws_ecs_service" "prometheus" {
+  name                   = "${local.prefix}-prometheus"
+  cluster                = aws_ecs_cluster.primary.name
+  task_definition        = aws_ecs_task_definition.prometheus.arn
+  desired_count          = 1
+  launch_type            = "FARGATE"
+  platform_version       = "1.4.0"
+  enable_execute_command = true
+
+  depends_on = [
+    aws_lb_listener_rule.prometheus,
+    aws_lb_listener.primary_http
+  ]
+
+  network_configuration {
+    subnets         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    security_groups = [aws_security_group.prometheus.id]
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.prometheus.arn
+    container_name   = "prometheus"
+    container_port   = 9090
+  }
+}
