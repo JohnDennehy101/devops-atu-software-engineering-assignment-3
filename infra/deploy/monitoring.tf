@@ -395,8 +395,8 @@ resource "aws_security_group" "prometheus" {
     from_port       = 9090
     to_port         = 9090
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_service.id]
-    description     = "Allow Prometheus metrics obtained from API"
+    security_groups = [aws_security_group.grafana.id]
+    description     = "Allow Prometheus access from Grafana"
   }
 
   egress {
@@ -444,14 +444,11 @@ resource "aws_ecs_task_definition" "prometheus" {
             - job_name: "api"
               metrics_path: "/v1/metrics"
               static_configs:
-                - targets: ["${aws_lb.primary.dns_name}:443"]
+                - targets: ["api.${local.prefix}.local:4000"]
                   labels:
                     service: "api"
                     environment: "${terraform.workspace}"
-              scheme: "https"
-              tls_config:
-                insecure_skip_verify: true
-          
+              scheme: "http"
             - job_name: "prometheus"
               static_configs:
                 - targets: ["localhost:9090"]
@@ -537,6 +534,10 @@ resource "aws_ecs_service" "prometheus" {
     security_groups = [aws_security_group.prometheus.id]
   }
 
+  service_registries {
+    registry_arn = aws_service_discovery_service.prometheus.arn
+  }
+
   load_balancer {
     target_group_arn = aws_lb_target_group.prometheus.arn
     container_name   = "prometheus"
@@ -605,7 +606,7 @@ resource "aws_ecs_task_definition" "grafana" {
           mkdir -p /etc/grafana/provisioning/datasources
           mkdir -p /etc/grafana/provisioning/dashboards
           
-          PROMETHEUS_URL="https://${var.subdomain[terraform.workspace]}.${var.dns_zone_name}/prometheus"
+          PROMETHEUS_URL="http://prometheus.${local.prefix}.local:9090"
           cat > /etc/grafana/provisioning/datasources/prometheus.yml <<EOF
           apiVersion: 1
           datasources:
@@ -615,8 +616,6 @@ resource "aws_ecs_task_definition" "grafana" {
               url: $${PROMETHEUS_URL}
               isDefault: true
               editable: true
-              jsonData:
-                tlsSkipVerify: true
           EOF
           
           cat > /etc/grafana/provisioning/dashboards/dashboard.yml <<'EOF'
