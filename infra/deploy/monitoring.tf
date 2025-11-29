@@ -543,3 +543,179 @@ resource "aws_ecs_service" "prometheus" {
     container_port   = 9090
   }
 }
+
+###############################################
+# Cloudwatch log group Definition for Grafana #
+###############################################
+
+resource "aws_cloudwatch_log_group" "grafana_logs" {
+  name = "${local.prefix}-grafana"
+}
+
+#########################################
+# Security group Definition for Grafana #
+#########################################
+
+resource "aws_security_group" "grafana" {
+  name        = "${local.prefix}-grafana"
+  description = "Security group for Grafana"
+  vpc_id      = aws_vpc.primary.id
+
+  ingress {
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.lb.id]
+    description     = "Allow Grafana UI from Load Balancer"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${local.prefix}-grafana"
+  }
+}
+
+###################################
+# ECS Task Definition for Grafana #
+###################################
+
+resource "aws_ecs_task_definition" "grafana" {
+  family                   = "${local.prefix}-grafana"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  task_role_arn            = aws_iam_role.task_role.arn
+  cpu                      = 512
+  memory                   = 1024
+  execution_role_arn       = aws_iam_role.task_execute_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "grafana"
+      image     = var.ecr_grafana_image
+      essential = true
+      entryPoint = ["sh", "-c"]
+      command = [
+        <<-EOT
+          mkdir -p /etc/grafana/provisioning/datasources
+          mkdir -p /etc/grafana/provisioning/dashboards
+          
+          PROMETHEUS_URL="https://${var.subdomain[terraform.workspace]}.${var.dns_zone_name}/prometheus"
+          cat > /etc/grafana/provisioning/datasources/prometheus.yml <<EOF
+          apiVersion: 1
+          datasources:
+            - name: Prometheus
+              type: prometheus
+              access: proxy
+              url: ${PROMETHEUS_URL}
+              isDefault: true
+              editable: true
+              jsonData:
+                tlsSkipVerify: true
+          EOF
+          
+          cat > /etc/grafana/provisioning/dashboards/dashboard.yml <<'EOF'
+          ${file("${path.module}/grafana-provisioning/dashboards/dashboard.yml")}
+          EOF
+          
+          cat > /etc/grafana/provisioning/dashboards/api_metrics.json <<'EOF'
+          ${file("${path.module}/grafana-provisioning/dashboards/api_metrics.json")}
+          EOF
+          
+          exec /run.sh
+        EOT
+      ]
+      environment = [
+        {
+          name  = "GF_SECURITY_ADMIN_PASSWORD"
+          value = var.grafana_admin_password
+        },
+        {
+          name  = "GF_SERVER_ROOT_URL"
+          value = coalesce(var.grafana_server_url, "https://${var.subdomain[terraform.workspace]}.${var.dns_zone_name}/grafana")
+        },
+        {
+          name  = "GF_USERS_ALLOW_SIGN_UP"
+          value = tostring(var.grafana_users_allow_sign_up)
+        },
+        {
+          name  = "GF_INSTALL_PLUGINS"
+          value = ""
+        }
+      ]
+      mountPoints = [
+        {
+          sourceVolume  = "grafana-data"
+          containerPath = "/var/lib/grafana"
+          readOnly      = false
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.grafana_logs.name
+          awslogs-region        = data.aws_region.current.name
+          awslogs-stream-prefix = "grafana"
+        }
+      }
+      portMappings = [{
+        containerPort = 3000
+        hostPort      = 3000
+        protocol      = "tcp"
+      }]
+    }
+  ])
+
+  volume {
+    name = "grafana-data"
+    efs_volume_configuration {
+      file_system_id     = aws_efs_file_system.grafana_data.id
+      root_directory     = "/"
+      transit_encryption = "ENABLED"
+      authorization_config {
+        access_point_id = aws_efs_access_point.grafana_data.id
+        iam             = "ENABLED"
+      }
+    }
+  }
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
+}
+
+######################################
+# ECS Service Definition for Grafana #
+######################################
+
+resource "aws_ecs_service" "grafana" {
+  name                   = "${local.prefix}-grafana"
+  cluster                = aws_ecs_cluster.primary.name
+  task_definition        = aws_ecs_task_definition.grafana.arn
+  desired_count          = 1
+  launch_type            = "FARGATE"
+  platform_version       = "1.4.0"
+  enable_execute_command = true
+
+  depends_on = [
+    aws_lb_listener_rule.grafana,
+    aws_lb_listener.primary_http
+  ]
+
+  network_configuration {
+    subnets         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    security_groups = [aws_security_group.grafana.id]
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.grafana.arn
+    container_name   = "grafana"
+    container_port   = 3000
+  }
+}

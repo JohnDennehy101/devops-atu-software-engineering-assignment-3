@@ -16,3 +16,4 @@ services:
       - TF_VAR_ecr_prometheus_image=${TF_VAR_ecr_prometheus_image}
       - TF_VAR_ecr_grafana_image=${TF_VAR_ecr_grafana_image}
       - TF_VAR_database_password=${TF_VAR_database_password}
+      - TF_VAR_grafana_admin_password=${TF_VAR_grafana_admin_password}

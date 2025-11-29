@@ -97,3 +97,33 @@ variable "database_username" {
 variable "database_password" {
   description = "database password for notes database"
 }
+
+###########################
+# Define Grafana password #
+###########################
+
+variable "grafana_admin_password" {
+  description = "Grafana admin password"
+  type        = string
+  sensitive   = true
+}
+
+##################################
+# Define Grafana server endpoint #
+##################################
+
+variable "grafana_server_url" {
+  description = "Grafana server URL"
+  type        = string
+  default     = ""
+}
+
+############################################
+# Define Grafana allow user sign up toggle #
+############################################
+
+variable "grafana_users_allow_sign_up" {
+  description = "Whether to allow users to sign up or not"
+  type        = bool
+  default     = false
+}
