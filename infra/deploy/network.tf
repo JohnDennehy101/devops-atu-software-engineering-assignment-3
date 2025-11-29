@@ -18,6 +18,7 @@ resource "time_sleep" "wait_for_public_ips" {
   destroy_duration = "150s"
 
   depends_on = [
+    aws_internet_gateway.primary,
     aws_lb.primary
   ]
 }
@@ -28,10 +29,6 @@ resource "time_sleep" "wait_for_public_ips" {
 
 resource "aws_internet_gateway" "primary" {
   vpc_id = aws_vpc.primary.id
-
-  depends_on = [
-    time_sleep.wait_for_public_ips
-  ]
 
   tags = {
     Name = "${local.prefix}-primary"
