@@ -42,6 +42,16 @@ resource "aws_security_group_rule" "lb_egress_to_ecs_api" {
   description              = "HTTP to ECS API"
 }
 
+resource "aws_security_group_rule" "lb_egress_to_prometheus" {
+  type                     = "egress"
+  from_port                = 9090
+  to_port                  = 9090
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.prometheus.id
+  security_group_id        = aws_security_group.lb.id
+  description              = "HTTP to Prometheus"
+}
+
 ############################
 # Load Balancer Definition #
 ############################
@@ -91,6 +101,23 @@ resource "aws_lb_target_group" "frontend" {
   }
 }
 
+resource "aws_lb_target_group" "prometheus" {
+  name        = "${local.prefix}-prometheus"
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.primary.id
+  target_type = "ip"
+  port        = 9090
+
+  health_check {
+    path                = "/-/healthy"
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+    matcher             = "200"
+  }
+}
+
 ######################################
 # Load Balancer Listeners Definition #
 ######################################
@@ -136,6 +163,22 @@ resource "aws_lb_listener_rule" "api" {
   condition {
     path_pattern {
       values = ["/api/*", "/v1/*", "/healthcheck"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "prometheus" {
+  listener_arn = aws_lb_listener.primary_https.arn
+  priority     = 50
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.prometheus.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/prometheus", "/prometheus/*"]
     }
   }
 }
