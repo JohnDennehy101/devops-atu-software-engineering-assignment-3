@@ -143,6 +143,10 @@ data "aws_iam_policy_document" "ec2" {
       "ec2:ModifyVpcAttribute",
       "ec2:ModifyVpcEndpoint",
       "ec2:RevokeSecurityGroupIngress",
+      "ec2:CreateNetworkInterface",
+      "ec2:DeleteNetworkInterface",
+      "ec2:ModifyNetworkInterfaceAttribute",
+      "ec2:AttachNetworkInterface",
     ]
     resources = ["*"]
   }
