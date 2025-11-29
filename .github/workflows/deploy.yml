@@ -6,6 +6,11 @@ on:
       - main
       - prod
 
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 jobs:
   lint_and_validate:
     uses: ./.github/workflows/lint-and-validate-terraform.yml
