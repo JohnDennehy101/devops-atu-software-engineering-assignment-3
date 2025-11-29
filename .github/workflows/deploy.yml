@@ -41,7 +41,9 @@ jobs:
           docker build --compress -t $API_IMAGE_URI ./backend
           echo "tag=$API_IMAGE_URI" >> $GITHUB_OUTPUT
       - name: Scan API Docker Image with Trivy
+        id: trivy_api
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           image-ref: ${{ steps.api_image.outputs.tag }}
           format: "sarif"
@@ -50,11 +52,17 @@ jobs:
           exit-code: "1"
       - name: Upload API Trivy Results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: "trivy-api-results.sarif"
+      - name: Fail if vulnerabilities found in API container
+        if: steps.trivy_api.outcome == 'failure'
+        run: |
+          echo "Trivy found vulnerabilities in API image"
+          exit 1
       - name: Push API Docker Image to ECR
-        if: success()
+        if: steps.trivy_api.outcome == 'success'
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -83,7 +91,9 @@ jobs:
 
           echo "tag=$FRONTEND_IMAGE_URI" >> $GITHUB_OUTPUT
       - name: Scan Frontend Docker Image with Trivy
+        id: trivy_frontend
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           image-ref: ${{ steps.frontend_image.outputs.tag }}
           format: "sarif"
@@ -92,11 +102,17 @@ jobs:
           exit-code: "1"
       - name: Upload Frontend Trivy Results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: "trivy-frontend-results.sarif"
+      - name: Fail if vulnerabilities found in Frontend container
+        if: steps.trivy_frontend.outcome == 'failure'
+        run: |
+          echo "Trivy found vulnerabilities in Frontend image"
+          exit 1
       - name: Push Frontend Docker Image to ECR
-        if: success()
+        if: steps.trivy_frontend.outcome == 'success'
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
