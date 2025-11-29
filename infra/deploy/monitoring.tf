@@ -462,7 +462,8 @@ resource "aws_ecs_task_definition" "prometheus" {
           exec /bin/prometheus \
             --config.file=/etc/prometheus/prometheus.yml \
             --storage.tsdb.path=/prometheus \
-            --web.external-url=/prometheus/
+            --web.external-url=/prometheus/ \
+            --storage.tsdb.retention.time=7d
         EOT
       ]
       environment = [
@@ -475,11 +476,6 @@ resource "aws_ecs_task_definition" "prometheus" {
         {
           sourceVolume  = "prometheus-config"
           containerPath = "/etc/prometheus"
-          readOnly      = false
-        },
-        {
-          sourceVolume  = "prometheus-data"
-          containerPath = "/prometheus"
           readOnly      = false
         }
       ]
@@ -507,19 +503,6 @@ resource "aws_ecs_task_definition" "prometheus" {
       transit_encryption = "ENABLED"
       authorization_config {
         access_point_id = aws_efs_access_point.prometheus_config.id
-        iam             = "ENABLED"
-      }
-    }
-  }
-
-  volume {
-    name = "prometheus-data"
-    efs_volume_configuration {
-      file_system_id     = aws_efs_file_system.prometheus_data.id
-      root_directory     = "/"
-      transit_encryption = "ENABLED"
-      authorization_config {
-        access_point_id = aws_efs_access_point.prometheus_data.id
         iam             = "ENABLED"
       }
     }
