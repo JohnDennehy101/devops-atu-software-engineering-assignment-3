@@ -33,6 +33,22 @@ variable "ecr_api_image" {
   description = "ECR repo path that contains image with API"
 }
 
+##########################################################################################################
+# Define variable that will store ECR repo url for Prometheus image (loaded via GitHub actions variable) #
+##########################################################################################################
+
+variable "ecr_prometheus_image" {
+  description = "ECR repo path that contains image with Prometheus"
+}
+
+#######################################################################################################
+# Define variable that will store ECR repo url for Grafana image (loaded via GitHub actions variable) #
+#######################################################################################################
+
+variable "ecr_grafana_image" {
+  description = "ECR repo path that contains image with Grafana"
+}
+
 ##################################################################################################
 # Define variable that will store ECR repo url for frontend (loaded via GitHub actions variable) #
 ##################################################################################################

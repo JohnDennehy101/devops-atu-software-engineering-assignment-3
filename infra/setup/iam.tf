@@ -75,6 +75,8 @@ data "aws_iam_policy_document" "ecr" {
     resources = [
       aws_ecr_repository.frontend.arn,
       aws_ecr_repository.backend.arn,
+      aws_ecr_repository.prometheus.arn,
+      aws_ecr_repository.grafana.arn,
     ]
   }
 }

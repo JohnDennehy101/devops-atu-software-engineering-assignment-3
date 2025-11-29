@@ -145,6 +145,8 @@ jobs:
         run: |
           export TF_VAR_ecr_api_image="${{ needs.build_and_push_images.outputs.api_image_tag }}"
           export TF_VAR_ecr_frontend_image="${{ needs.build_and_push_images.outputs.frontend_image_tag }}"
+          export TF_VAR_ecr_prometheus_image="${{ vars.ECR_REPO_PROMETHEUS }}"
+          export TF_VAR_ecr_grafana_image="${{ vars.ECR_REPO_GRAFANA }}"
           export TF_VAR_database_password=${{secrets.DATABASE_PASSWORD}}
           workspace=$(cat .workspace)
           cd infra/
