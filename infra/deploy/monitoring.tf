@@ -427,7 +427,7 @@ resource "aws_ecs_task_definition" "prometheus" {
   container_definitions = jsonencode([
     {
       name       = "prometheus"
-      image      = "prom/prometheus:latest"
+      image      = "public.ecr.aws/docker/library/prom/prometheus:latest"
       essential  = true
       entryPoint = ["sh", "-c"]
       command = [
