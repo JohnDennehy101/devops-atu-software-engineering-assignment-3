@@ -164,6 +164,16 @@ resource "aws_security_group_rule" "ecs_ingress_from_lb_api" {
   description              = "API from ALB"
 }
 
+resource "aws_security_group_rule" "ecs_ingress_from_prometheus" {
+  type                     = "ingress"
+  from_port                = 4000
+  to_port                  = 4000
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.prometheus.id
+  security_group_id        = aws_security_group.ecs_service.id
+  description              = "API metrics data from Prometheus"
+}
+
 resource "aws_security_group_rule" "ecs_egress_to_rds" {
   type              = "egress"
   from_port         = 5432
@@ -182,6 +192,50 @@ resource "aws_security_group_rule" "ecs_egress_vpc_tcp" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.ecs_service.id
   description       = "HTTPS TCP communication"
+}
+
+######################################################
+# Service Discovery Definition for Internal Services #
+######################################################
+
+resource "aws_service_discovery_private_dns_namespace" "internal" {
+  name        = "${local.prefix}.local"
+  description = "Service discovery namespace"
+  vpc         = aws_vpc.primary.id
+}
+
+resource "aws_service_discovery_service" "api" {
+  name = "api"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.internal.id
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_grace_period_seconds = 30
+}
+
+resource "aws_service_discovery_service" "prometheus" {
+  name = "prometheus"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.internal.id
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_grace_period_seconds = 30
 }
 
 ##########################
@@ -203,6 +257,9 @@ resource "aws_ecs_service" "primary" {
   network_configuration {
     subnets         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
     security_groups = [aws_security_group.ecs_service.id]
+  }
+  service_registries {
+    registry_arn = aws_service_discovery_service.api.arn
   }
   load_balancer {
     target_group_arn = aws_lb_target_group.frontend.arn
