@@ -204,6 +204,7 @@ resource "aws_iam_user_policy_attachment" "rds" {
 ###############################################
 
 data "aws_iam_policy_document" "ecs" {
+  # Add ECS permissions
   statement {
     effect = "Allow"
     actions = [
@@ -219,6 +220,41 @@ data "aws_iam_policy_document" "ecs" {
       "ecs:CreateCluster",
       "ecs:UpdateCluster",
       "ecs:TagResource",
+    ]
+    resources = ["*"]
+  }
+
+  # Add Service Discovery permissions
+  statement {
+    effect = "Allow"
+    actions = [
+      "servicediscovery:CreatePrivateDnsNamespace",
+      "servicediscovery:DeletePrivateDnsNamespace",
+      "servicediscovery:GetNamespace",
+      "servicediscovery:ListNamespaces",
+      "servicediscovery:UpdatePrivateDnsNamespace",
+      "servicediscovery:CreateService",
+      "servicediscovery:DeleteService",
+      "servicediscovery:GetService",
+      "servicediscovery:ListServices",
+      "servicediscovery:UpdateService",
+      "servicediscovery:RegisterInstance",
+      "servicediscovery:DeregisterInstance",
+      "servicediscovery:GetInstancesHealthStatus",
+      "servicediscovery:ListInstances",
+      "servicediscovery:TagResource",
+      "servicediscovery:UntagResource",
+      "servicediscovery:ListTagsForResource"
+    ]
+    resources = ["*"]
+  }
+
+  # Separate statement for operations
+  statement {
+    effect = "Allow"
+    actions = [
+      "servicediscovery:GetOperation",
+      "servicediscovery:ListOperations"
     ]
     resources = ["*"]
   }
@@ -385,6 +421,7 @@ data "aws_iam_policy_document" "elb_route53_combined" {
       "route53:ChangeResourceRecordSets",
       "route53:GetChange",
       "route53:ListResourceRecordSets",
+      "route53:CreateHostedZone",
 
       # Access Control Manager permissions
       "acm:RequestCertificate",
