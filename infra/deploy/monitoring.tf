@@ -448,10 +448,6 @@ resource "aws_ecs_task_definition" "prometheus" {
                     service: "api"
                     environment: "${terraform.workspace}"
               scheme: "http"
-            - job_name: "prometheus"
-              metrics_path: "/metrics" 
-              static_configs:
-                - targets: ["localhost:9090"]
           EOF
           chmod 644 /etc/prometheus/prometheus.yml
           
@@ -635,11 +631,7 @@ resource "aws_ecs_task_definition" "grafana" {
         },
         {
           name  = "GF_SERVER_ROOT_URL"
-          value = coalesce(var.grafana_server_url, "https://${var.subdomain[terraform.workspace]}.${var.dns_zone_name}/grafana")
-        },
-        {
-          name  = "GF_SERVER_SERVE_FROM_SUBPATH"
-          value = "true"
+          value = coalesce(var.grafana_server_url, "https://grafana.${var.subdomain[terraform.workspace]}.${var.dns_zone_name}")
         },
         {
           name  = "GF_USERS_ALLOW_SIGN_UP"
