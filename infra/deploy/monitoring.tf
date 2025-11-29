@@ -596,9 +596,9 @@ resource "aws_ecs_task_definition" "grafana" {
 
   container_definitions = jsonencode([
     {
-      name      = "grafana"
-      image     = var.ecr_grafana_image
-      essential = true
+      name       = "grafana"
+      image      = var.ecr_grafana_image
+      essential  = true
       entryPoint = ["sh", "-c"]
       command = [
         <<-EOT

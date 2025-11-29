@@ -8,13 +8,13 @@ resource "aws_security_group" "efs" {
   vpc_id      = aws_vpc.primary.id
 
   ingress {
-    from_port       = 2049
-    to_port         = 2049
-    protocol        = "tcp"
+    from_port = 2049
+    to_port   = 2049
+    protocol  = "tcp"
     security_groups = [
       aws_security_group.prometheus.id,
       aws_security_group.grafana.id
-      ]
+    ]
   }
 
   egress {
