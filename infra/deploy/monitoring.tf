@@ -640,6 +640,10 @@ resource "aws_ecs_task_definition" "grafana" {
           value = coalesce(var.grafana_server_url, "https://${var.subdomain[terraform.workspace]}.${var.dns_zone_name}/grafana")
         },
         {
+          name  = "GF_SERVER_SERVE_FROM_SUBPATH"
+          value = "true"
+        },
+        {
           name  = "GF_USERS_ALLOW_SIGN_UP"
           value = tostring(var.grafana_users_allow_sign_up)
         },
