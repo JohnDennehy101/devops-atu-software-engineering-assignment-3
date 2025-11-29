@@ -434,8 +434,7 @@ resource "aws_ecs_task_definition" "prometheus" {
         <<-EOT
           while [ ! -d /etc/prometheus ]; do sleep 1; done
           
-          if [ ! -f /etc/prometheus/prometheus.yml ]; then
-            cat > /etc/prometheus/prometheus.yml <<'EOF'
+          cat > /etc/prometheus/prometheus.yml <<'EOF'
           global:
             scrape_interval: 15s
             evaluation_interval: 15s
@@ -450,11 +449,11 @@ resource "aws_ecs_task_definition" "prometheus" {
                     environment: "${terraform.workspace}"
               scheme: "http"
             - job_name: "prometheus"
+              metrics_path: "/metrics" 
               static_configs:
                 - targets: ["localhost:9090"]
           EOF
-            chmod 644 /etc/prometheus/prometheus.yml
-          fi
+          chmod 644 /etc/prometheus/prometheus.yml
           
           exec /bin/prometheus \
             --config.file=/etc/prometheus/prometheus.yml \
