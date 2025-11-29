@@ -15,7 +15,7 @@ resource "aws_vpc" "primary" {
 provider "time" {}
 
 resource "time_sleep" "wait_for_public_ips" {
-  destroy_duration = "90s"
+  destroy_duration = "150s"
 
   depends_on = [
     aws_lb.primary
