@@ -459,7 +459,10 @@ resource "aws_ecs_task_definition" "prometheus" {
             chmod 644 /etc/prometheus/prometheus.yml
           fi
           
-          exec /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus
+          exec /bin/prometheus \
+            --config.file=/etc/prometheus/prometheus.yml \
+            --storage.tsdb.path=/prometheus \
+            --web.external-url=/prometheus/
         EOT
       ]
       environment = [
