@@ -12,7 +12,17 @@ permissions:
   security-events: write
 
 jobs:
+  api_checks:
+    uses: ./.github/workflows/api.yml
+
+  frontend_checks:
+    uses: ./.github/workflows/frontend.yml
+
+  codeql_checks:
+    uses: ./.github/workflows/codeql.yml
+
   lint_and_validate:
+    needs: [api_checks, frontend_checks, codeql_checks]
     uses: ./.github/workflows/lint-and-validate-terraform.yml
     name: Lint & Validate Terraform
     secrets:
@@ -22,7 +32,7 @@ jobs:
   build_and_push_images:
     name: Build & Push Docker Images
     runs-on: ubuntu-latest
-    needs: [lint_and_validate]
+    needs: [api_checks, frontend_checks, codeql_checks, lint_and_validate]
     outputs:
       api_image_tag: ${{ steps.api_image.outputs.tag }}
       frontend_image_tag: ${{ steps.frontend_image.outputs.tag }}
