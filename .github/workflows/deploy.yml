@@ -14,9 +14,13 @@ permissions:
 jobs:
   api_checks:
     uses: ./.github/workflows/api.yml
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   frontend_checks:
     uses: ./.github/workflows/frontend.yml
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   codeql_checks:
     uses: ./.github/workflows/codeql.yml
