@@ -54,14 +54,11 @@ resource "aws_db_instance" "primary" {
   instance_class             = "db.t4g.micro"
   username                   = var.database_username
   password                   = var.database_password
-  # TODO: Update to False when final version 
-  skip_final_snapshot  = true
-  db_subnet_group_name = aws_db_subnet_group.primary.name
-  # TODO: Update to True when final version 
-  multi_az = false
-  # TODO: Update when final version 
-  backup_retention_period = 0
-  vpc_security_group_ids  = [aws_security_group.rds.id]
+  skip_final_snapshot        = false
+  db_subnet_group_name       = aws_db_subnet_group.primary.name
+  multi_az                   = false
+  backup_retention_period    = 0
+  vpc_security_group_ids     = [aws_security_group.rds.id]
   tags = {
     Name = "${local.prefix}-primary"
   }
