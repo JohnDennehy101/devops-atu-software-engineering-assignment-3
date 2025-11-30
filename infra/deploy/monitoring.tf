@@ -16,7 +16,7 @@ resource "aws_cloudwatch_dashboard" "api" {
         properties = {
           metrics = [
             ["AWS/ECS", "CPUUtilization", "ServiceName", aws_ecs_service.primary.name, "ClusterName", aws_ecs_cluster.primary.name],
-            [".", "MemoryUtilization", ".", ".", "."]
+            ["AWS/ECS", "MemoryUtilization", "ServiceName", aws_ecs_service.primary.name, "ClusterName", aws_ecs_cluster.primary.name]
           ]
           view    = "timeSeries"
           stacked = false
@@ -35,9 +35,9 @@ resource "aws_cloudwatch_dashboard" "api" {
         properties = {
           metrics = [
             ["AWS/ApplicationELB", "RequestCount", "TargetGroup", split("/", aws_lb_target_group.api.arn)[length(split("/", aws_lb_target_group.api.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
-            [".", "HTTPCode_Target_2XX_Count", ".", ".", ".", "."],
-            [".", "HTTPCode_Target_4XX_Count", ".", ".", ".", "."],
-            [".", "HTTPCode_Target_5XX_Count", ".", ".", ".", "."],
+            ["AWS/ApplicationELB", "HTTPCode_Target_2XX_Count", "TargetGroup", split("/", aws_lb_target_group.api.arn)[length(split("/", aws_lb_target_group.api.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
+            ["AWS/ApplicationELB", "HTTPCode_Target_4XX_Count", "TargetGroup", split("/", aws_lb_target_group.api.arn)[length(split("/", aws_lb_target_group.api.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
+            ["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "TargetGroup", split("/", aws_lb_target_group.api.arn)[length(split("/", aws_lb_target_group.api.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]]
           ]
           view    = "timeSeries"
           stacked = false
@@ -56,8 +56,8 @@ resource "aws_cloudwatch_dashboard" "api" {
         properties = {
           metrics = [
             ["AWS/ApplicationELB", "TargetResponseTime", "TargetGroup", split("/", aws_lb_target_group.api.arn)[length(split("/", aws_lb_target_group.api.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
-            [".", "HealthyHostCount", ".", ".", ".", "."],
-            [".", "UnHealthyHostCount", ".", ".", ".", "."]
+            ["AWS/ApplicationELB", "HealthyHostCount", "TargetGroup", split("/", aws_lb_target_group.api.arn)[length(split("/", aws_lb_target_group.api.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
+            ["AWS/ApplicationELB", "UnHealthyHostCount", "TargetGroup", split("/", aws_lb_target_group.api.arn)[length(split("/", aws_lb_target_group.api.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]]
           ]
           view    = "timeSeries"
           stacked = false
@@ -76,7 +76,7 @@ resource "aws_cloudwatch_dashboard" "api" {
         properties = {
           metrics = [
             ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", aws_db_instance.primary.id],
-            [".", "DatabaseConnections", ".", "."]
+            ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", aws_db_instance.primary.id]
           ]
           view    = "timeSeries"
           stacked = false
@@ -109,7 +109,7 @@ resource "aws_cloudwatch_dashboard" "frontend" {
         properties = {
           metrics = [
             ["AWS/ECS", "CPUUtilization", "ServiceName", aws_ecs_service.primary.name, "ClusterName", aws_ecs_cluster.primary.name],
-            [".", "MemoryUtilization", ".", ".", "."]
+            ["AWS/ECS", "MemoryUtilization", "ServiceName", aws_ecs_service.primary.name, "ClusterName", aws_ecs_cluster.primary.name]
           ]
           view    = "timeSeries"
           stacked = false
@@ -128,9 +128,9 @@ resource "aws_cloudwatch_dashboard" "frontend" {
         properties = {
           metrics = [
             ["AWS/ApplicationELB", "RequestCount", "TargetGroup", split("/", aws_lb_target_group.frontend.arn)[length(split("/", aws_lb_target_group.frontend.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
-            [".", "HTTPCode_Target_2XX_Count", ".", ".", ".", "."],
-            [".", "HTTPCode_Target_4XX_Count", ".", ".", ".", "."],
-            [".", "HTTPCode_Target_5XX_Count", ".", ".", ".", "."],
+            ["AWS/ApplicationELB", "HTTPCode_Target_2XX_Count", "TargetGroup", split("/", aws_lb_target_group.frontend.arn)[length(split("/", aws_lb_target_group.frontend.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
+            ["AWS/ApplicationELB", "HTTPCode_Target_4XX_Count", "TargetGroup", split("/", aws_lb_target_group.frontend.arn)[length(split("/", aws_lb_target_group.frontend.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
+            ["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "TargetGroup", split("/", aws_lb_target_group.frontend.arn)[length(split("/", aws_lb_target_group.frontend.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]]
           ]
           view    = "timeSeries"
           stacked = false
@@ -149,8 +149,8 @@ resource "aws_cloudwatch_dashboard" "frontend" {
         properties = {
           metrics = [
             ["AWS/ApplicationELB", "TargetResponseTime", "TargetGroup", split("/", aws_lb_target_group.frontend.arn)[length(split("/", aws_lb_target_group.frontend.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
-            [".", "HealthyHostCount", ".", ".", ".", "."],
-            [".", "UnHealthyHostCount", ".", ".", ".", "."]
+            ["AWS/ApplicationELB", "HealthyHostCount", "TargetGroup", split("/", aws_lb_target_group.frontend.arn)[length(split("/", aws_lb_target_group.frontend.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]],
+            ["AWS/ApplicationELB", "UnHealthyHostCount", "TargetGroup", split("/", aws_lb_target_group.frontend.arn)[length(split("/", aws_lb_target_group.frontend.arn)) - 1], "LoadBalancer", split("/", aws_lb.primary.arn)[length(split("/", aws_lb.primary.arn)) - 1]]
           ]
           view    = "timeSeries"
           stacked = false
