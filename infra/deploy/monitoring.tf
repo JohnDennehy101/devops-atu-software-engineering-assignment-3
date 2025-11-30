@@ -454,7 +454,6 @@ resource "aws_ecs_task_definition" "prometheus" {
           exec /bin/prometheus \
             --config.file=/etc/prometheus/prometheus.yml \
             --storage.tsdb.path=/prometheus \
-            --web.external-url=/prometheus/ \
             --storage.tsdb.retention.time=7d
         EOT
       ]
