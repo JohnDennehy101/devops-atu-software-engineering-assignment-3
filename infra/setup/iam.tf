@@ -232,6 +232,7 @@ data "aws_iam_policy_document" "ecs" {
       "servicediscovery:DeletePrivateDnsNamespace",
       "servicediscovery:GetNamespace",
       "servicediscovery:ListNamespaces",
+      "servicediscovery:DeleteNamespace",
       "servicediscovery:UpdatePrivateDnsNamespace",
       "servicediscovery:CreateService",
       "servicediscovery:DeleteService",
