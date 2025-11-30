@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - "frontend/**"
+  workflow_call:
 
 permissions:
   actions: read
