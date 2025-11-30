@@ -118,14 +118,14 @@ resource "aws_lb_target_group" "prometheus" {
   target_type = "ip"
   port        = 9090
 
-  health_check {
-    path                = "/"
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
-    timeout             = 10
-    interval            = 30
-    matcher             = "200"
-  }
+  # health_check {
+  #   path                = "/"
+  #   healthy_threshold   = 2
+  #   unhealthy_threshold = 5
+  #   timeout             = 15
+  #   interval            = 30
+  #   matcher             = "200"
+  # }
 }
 
 resource "aws_lb_target_group" "grafana" {
