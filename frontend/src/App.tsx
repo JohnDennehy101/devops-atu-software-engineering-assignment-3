@@ -5,7 +5,7 @@ import { routes } from "./routes"
 function App(): JSX.Element {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-green-50 dark:bg-green-900">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <main className="w-full h-screen py-6 px-4 flex items-center justify-center">
           <Routes>
             {routes.map(route => (
