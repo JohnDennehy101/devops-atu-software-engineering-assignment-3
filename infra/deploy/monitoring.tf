@@ -15,13 +15,13 @@ resource "aws_cloudwatch_dashboard" "api" {
         height = 5
         properties = {
           metrics = [
-            ["ECS/ContainerInsights", "CpuUtilized", "ServiceName", aws_ecs_service.primary.name, "ClusterName", aws_ecs_cluster.primary.name, "ContainerName", "api"],
-            [".", "MemoryUtilized", ".", ".", ".", ".", ".", "."]
+            ["AWS/ECS", "CPUUtilization", "ServiceName", aws_ecs_service.primary.name, "ClusterName", aws_ecs_cluster.primary.name],
+            [".", "MemoryUtilization", ".", ".", "."]
           ]
           view    = "timeSeries"
           stacked = false
           region  = data.aws_region.current.name
-          title   = "API Container CPU and Memory usage"
+          title   = "API Service CPU and Memory usage"
           period  = 300
           stat    = "Average"
         }
@@ -44,6 +44,7 @@ resource "aws_cloudwatch_dashboard" "api" {
           region  = data.aws_region.current.name
           title   = "API Requests & Status Codes"
           period  = 300
+          stat    = "Sum"
         }
       },
       {
@@ -63,6 +64,7 @@ resource "aws_cloudwatch_dashboard" "api" {
           region  = data.aws_region.current.name
           title   = "API Health & Response Time"
           period  = 300
+          stat    = "Average"
         }
       },
       {
@@ -81,6 +83,7 @@ resource "aws_cloudwatch_dashboard" "api" {
           region  = data.aws_region.current.name
           title   = "RDS CPU & Connections"
           period  = 300
+          stat    = "Average"
         }
       }
     ]
@@ -105,13 +108,13 @@ resource "aws_cloudwatch_dashboard" "frontend" {
         height = 5
         properties = {
           metrics = [
-            ["ECS/ContainerInsights", "CpuUtilized", "ServiceName", aws_ecs_service.primary.name, "ClusterName", aws_ecs_cluster.primary.name, "ContainerName", "frontend"],
-            [".", "MemoryUtilized", ".", ".", ".", ".", ".", "."]
+            ["AWS/ECS", "CPUUtilization", "ServiceName", aws_ecs_service.primary.name, "ClusterName", aws_ecs_cluster.primary.name],
+            [".", "MemoryUtilization", ".", ".", "."]
           ]
           view    = "timeSeries"
           stacked = false
           region  = data.aws_region.current.name
-          title   = "Frontend Container CPU and Memory usage"
+          title   = "Frontend Service CPU and Memory usage"
           period  = 300
           stat    = "Average"
         }
@@ -134,6 +137,7 @@ resource "aws_cloudwatch_dashboard" "frontend" {
           region  = data.aws_region.current.name
           title   = "Frontend Requests & Status Codes"
           period  = 300
+          stat    = "Sum"
         }
       },
       {
@@ -153,6 +157,7 @@ resource "aws_cloudwatch_dashboard" "frontend" {
           region  = data.aws_region.current.name
           title   = "Frontend Health & Response Time"
           period  = 300
+          stat    = "Average"
         }
       },
     ]
