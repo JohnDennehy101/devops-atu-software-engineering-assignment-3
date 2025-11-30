@@ -13,6 +13,38 @@ From root (currently api is fully available within Docker)
 docker compose up --build
 ```
 
+If everything runs successfully, you should be able to navigate to `http://localhost:3000` to view the UI
+
+<img src="documentation/images/ui-local.png" alt="UI Running Locally" width="800" />
+
+And to view the prometheus UI, you can navigate to `http://localhost:9090`
+
+<img src="documentation/images/prometheus-local.png" alt="Prometheus Running Locally" width="800" />
+
+And to view the Grafana Dashboard, navigate to `http://localhost:3001`
+
+Which will show a login
+
+<img src="documentation/images/grafana-local.png" alt="Grafana Running Locally - Login" width="800" />
+
+You can enter the following
+
+Username: admin
+Password: admin
+
+Then you will be prompted to select a new password.
+
+Once you have done that, you will be logged in.
+
+Then you can navigate to the Grafana dashboard.
+
+<img src="documentation/images/grafana-local-dashboard-1.png" alt="Grafana Running Locally - Dashboard One" width="800" />
+
+And then view the dashboard by clicking on it.
+
+<img src="documentation/images/grafana-local-dashboard-2.png" alt="Grafana Running Locally - Dashboard One" width="800" />
+
+
 ## Architecture
 
 There are two different Terraform architectures in this repo.
