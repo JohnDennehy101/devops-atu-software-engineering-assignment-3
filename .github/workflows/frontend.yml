@@ -6,6 +6,9 @@ on:
     paths:
       - "frontend/**"
   workflow_call:
+    secrets:
+      SNYK_TOKEN:
+        required: false
 
 permissions:
   actions: read
