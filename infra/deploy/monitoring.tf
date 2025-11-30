@@ -520,7 +520,7 @@ resource "aws_ecs_service" "prometheus" {
   enable_execute_command = true
 
   depends_on = [
-    aws_lb_listener_rule.prometheus,
+    # aws_lb_listener_rule.prometheus,
     aws_lb_listener.primary_http
   ]
 
@@ -533,11 +533,11 @@ resource "aws_ecs_service" "prometheus" {
     registry_arn = aws_service_discovery_service.prometheus.arn
   }
 
-  load_balancer {
-    target_group_arn = aws_lb_target_group.prometheus.arn
-    container_name   = "prometheus"
-    container_port   = 9090
-  }
+  # load_balancer {
+  #   target_group_arn = aws_lb_target_group.prometheus.arn
+  #   container_name   = "prometheus"
+  #   container_port   = 9090
+  # }
 }
 
 ###############################################

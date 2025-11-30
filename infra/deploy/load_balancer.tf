@@ -199,21 +199,21 @@ resource "aws_lb_listener_rule" "api" {
   }
 }
 
-resource "aws_lb_listener_rule" "prometheus" {
-  listener_arn = aws_lb_listener.primary_https.arn
-  priority     = 50
+# resource "aws_lb_listener_rule" "prometheus" {
+#   listener_arn = aws_lb_listener.primary_https.arn
+#   priority     = 50
 
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prometheus.arn
-  }
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.prometheus.arn
+#   }
 
-  condition {
-    path_pattern {
-      values = ["/prometheus", "/prometheus/*"]
-    }
-  }
-}
+#   condition {
+#     path_pattern {
+#       values = ["/prometheus", "/prometheus/*"]
+#     }
+#   }
+# }
 
 resource "aws_lb_listener_rule" "grafana" {
   listener_arn = aws_lb_listener.primary_https.arn
