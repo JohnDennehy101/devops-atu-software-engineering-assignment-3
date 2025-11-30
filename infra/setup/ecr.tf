@@ -3,8 +3,7 @@ resource "aws_ecr_repository" "frontend" {
   image_tag_mutability = "MUTABLE"
   force_delete         = true
   image_scanning_configuration {
-    # TODO - reenable when submitting
-    scan_on_push = false
+    scan_on_push = true
   }
 }
 
@@ -13,8 +12,7 @@ resource "aws_ecr_repository" "backend" {
   image_tag_mutability = "MUTABLE"
   force_delete         = true
   image_scanning_configuration {
-    # TODO - reenable when submitting
-    scan_on_push = false
+    scan_on_push = true
   }
 }
 
@@ -23,8 +21,7 @@ resource "aws_ecr_repository" "prometheus" {
   image_tag_mutability = "MUTABLE"
   force_delete         = true
   image_scanning_configuration {
-    # TODO - reenable when submitting
-    scan_on_push = false
+    scan_on_push = true
   }
 }
 
@@ -33,7 +30,6 @@ resource "aws_ecr_repository" "grafana" {
   image_tag_mutability = "MUTABLE"
   force_delete         = true
   image_scanning_configuration {
-    # TODO - reenable when submitting
-    scan_on_push = false
+    scan_on_push = true
   }
 }
