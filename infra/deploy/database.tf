@@ -55,6 +55,7 @@ resource "aws_db_instance" "primary" {
   username                   = var.database_username
   password                   = var.database_password
   skip_final_snapshot        = false
+  final_snapshot_identifier  = "${local.prefix}-db-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
   db_subnet_group_name       = aws_db_subnet_group.primary.name
   multi_az                   = false
   backup_retention_period    = 0
